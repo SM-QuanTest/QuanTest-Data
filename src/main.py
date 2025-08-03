@@ -1,15 +1,17 @@
-import os
+# from pathlib import Path
 
 # from tabulate import tabulate
 import win32com.client
 
-from src.cybos.stock_dl import save_stock#, filter_stock
+from src.cybos.market_cap_cybos import get_market_caps
+from src.cybos.stock_cybos import save_stock, get_kosdaq_cybos_ticker
+from src.db.market_cap_db import upsert_market_cap
 from src.db.stock_dl import insert_stocks
-from src.utils.utils import load_cybos_tickers_db
-from .cybos.sector_name_dl import *
+from .cybos.sector_cybos import *
 from .db.sector_dl import *
 
-project_root = Path(os.getenv("PROJECT_ROOT"))
+
+# project_root = Path(os.getenv("PROJECT_ROOT"))
 
 
 def InitPlusCheck():
@@ -31,28 +33,28 @@ def InitPlusCheck():
 
 if __name__ == "__main__":
     InitPlusCheck()
-    # print(filter_stock())
+    kosdaq_cybos_ticker = get_kosdaq_cybos_ticker()
 
-
-######################################################
-    #  cybos_ticker 구할 때 -> 가장 최근 일자 중에서 시가총액이 5000(단위:억원)이 넘은
-
-
-    # input_csv = project_root / "stockdata" / "filteredCode.csv"
-    # load cybos tickers
-    # cybos_ticker_df = load_cybos_tickers_csv(input_csv)
-    cybos_ticker_df = load_cybos_tickers_db()
+    ######################################################
+    #     # input_csv = project_root / "stockdata" / "filteredCode.csv"
+    #     # load cybos tickers
+    #     # cybos_ticker_df = load_cybos_tickers_csv(input_csv)
+    #     cybos_ticker_df = load_cybos_tickers_db()
 
     ############################sector###########################
-    sector_df = save_sector_name(cybos_ticker_df)
+    sector_df = save_sector_name(kosdaq_cybos_ticker)
 
     # sector db download
     insert_sectors(sector_df)
 
     ###########################stock###########################
-    stock_df = save_stock(cybos_ticker_df)
+    stock_df = save_stock(kosdaq_cybos_ticker)
 
     # stock db download
     insert_stocks(stock_df)
 
-    #########################chart####################
+    #########################market_cap####################
+    market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
+
+    # market_cap db download
+    upsert_market_cap(market_cap_df)

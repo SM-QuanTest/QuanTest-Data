@@ -1,13 +1,15 @@
 import pandas as pd
-from pathlib import Path
-from ..config.cybos_config import objCpCodeMgr
+
+from ..config.cybos_config import get_obj_cp_code_mgr
+
 
 def find_cybos_sector_code(cybos_ticker: str) -> str:
     """
     1) cybos_ticker를 입력
     2) cybos 업종 코드를 리턴
     """
-    cybos_sector_code = objCpCodeMgr.GetStockIndustryCode(cybos_ticker)
+    obj_cp_code_mgr = get_obj_cp_code_mgr()
+    cybos_sector_code = obj_cp_code_mgr.GetStockIndustryCode(cybos_ticker)
     return cybos_sector_code
 
 
@@ -16,8 +18,10 @@ def find_cybos_sector_name(cybos_sector_code) -> str:
     1) cybos_sector_code를 입력
     2) 업종 이름을 리턴
     """
-    cybos_sector_name = objCpCodeMgr.GetIndustryName(cybos_sector_code)
+    obj_cp_code_mgr = get_obj_cp_code_mgr()
+    cybos_sector_name = obj_cp_code_mgr.GetIndustryName(cybos_sector_code)
     return cybos_sector_name
+
 
 def process_sector_name(input: str) -> str:
     """
@@ -29,6 +33,7 @@ def process_sector_name(input: str) -> str:
     if cybos_sector_name.startswith("코스닥 "):
         cybos_sector_name = cybos_sector_name[4:]
     return cybos_sector_name
+
 
 def save_sector_name(input_df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -45,6 +50,3 @@ def save_sector_name(input_df: pd.DataFrame) -> pd.DataFrame:
     sector_df = pd.DataFrame(list(sector_set), columns=['sector_name'])
     print(sector_df)
     return sector_df
-
-
-
