@@ -3,9 +3,9 @@ import os
 # from tabulate import tabulate
 import win32com.client
 
-from src.cybos.stock_dl import save_stock
+from src.cybos.stock_dl import save_stock#, filter_stock
 from src.db.stock_dl import insert_stocks
-from .config.cybos_config import load_cybos_tickers
+from src.utils.utils import load_cybos_tickers_db
 from .cybos.sector_name_dl import *
 from .db.sector_dl import *
 
@@ -31,10 +31,17 @@ def InitPlusCheck():
 
 if __name__ == "__main__":
     InitPlusCheck()
+    # print(filter_stock())
 
-    input_csv = project_root / "stockdata" / "filteredCode.csv"
+
+######################################################
+    #  cybos_ticker 구할 때 -> 가장 최근 일자 중에서 시가총액이 5000(단위:억원)이 넘은
+
+
+    # input_csv = project_root / "stockdata" / "filteredCode.csv"
     # load cybos tickers
-    cybos_ticker_df = load_cybos_tickers(input_csv)
+    # cybos_ticker_df = load_cybos_tickers_csv(input_csv)
+    cybos_ticker_df = load_cybos_tickers_db()
 
     ############################sector###########################
     sector_df = save_sector_name(cybos_ticker_df)
@@ -47,3 +54,5 @@ if __name__ == "__main__":
 
     # stock db download
     insert_stocks(stock_df)
+
+    #########################chart####################
