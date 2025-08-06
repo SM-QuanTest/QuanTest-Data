@@ -10,7 +10,7 @@ from tqdm import tqdm
 from src.cybos.chart_cybos import fetch_chart_data
 from src.cybos.market_cap_cybos import get_market_caps
 from src.cybos.stock_cybos import save_stock, get_kosdaq_cybos_ticker
-from src.db.chart_dl import insert_chart
+from src.db.chart_dl import insert_chart, update_chart_change_percentage
 from src.db.market_cap_db import upsert_market_cap
 from src.db.stock_dl import insert_stocks
 from src.utils.chart_util import process_chart_list_to_df
@@ -84,8 +84,8 @@ if __name__ == "__main__":
 
     #########################chart####################
     cybos_ticker_list = kosdaq_cybos_ticker['cybos_ticker'].to_list()
-    start = 20250415
-    end = 20250415
+    start = 20150414
+    end = 20250731
 
     with ProcessPoolExecutor(max_workers=4) as executor:
         for _ in tqdm(
@@ -99,3 +99,5 @@ if __name__ == "__main__":
                 desc="Processing tickers"
         ):
             pass
+
+    update_chart_change_percentage(start, end)

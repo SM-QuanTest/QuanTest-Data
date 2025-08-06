@@ -1,4 +1,5 @@
 import io
+from datetime import datetime
 
 import pandas as pd
 from psycopg2.extras import execute_values
@@ -29,6 +30,8 @@ def insert_chart(input_df: pd.DataFrame):
 
     df = df.merge(stock_map, on='ticker', how='left')
     df = df.drop(columns='ticker')
+
+    print(df[['chart_date', 'stock_id']].tail(10))
 
     # execute_values 로 대량 INSERT + 중복 무시
     records = df[[
@@ -66,3 +69,36 @@ def insert_chart(input_df: pd.DataFrame):
             updated = 0
 
         print(f">>> 삽입: {inserted}건, >>> 갱신: {updated}건")
+
+def update_chart_change_percentage(start: int, end: int):
+    """
+        1) start, end date 입력받고 date 변환
+        2) 윈도우 함수로 이전 종가(lag) 가져와 등락률 계산, DB 업데이트
+        """
+
+    start_date = datetime.strptime(str(start), "%Y%m%d").date()
+    end_date = datetime.strptime(str(end), "%Y%m%d").date()
+
+    sql = text("""
+               WITH chart_pct AS (SELECT stock_id,
+                                         chart_date,
+                                         -- lag()로 전일 종가
+                                         lag(chart_close) OVER (PARTITION BY stock_id ORDER BY chart_date) AS prev_close, chart_close
+                                  FROM public.charts)
+               UPDATE public.charts AS c
+               SET chart_change_percentage =
+                       ((c.chart_close - cp.prev_close):: double precision
+                   / cp.prev_close) * 100
+               FROM chart_pct AS cp
+               WHERE
+                   c.stock_id = cp.stock_id
+                 AND c.chart_date = cp.chart_date
+                 AND cp.prev_close IS NOT NULL -- 첫 날 건너뛰기
+                 AND c.chart_date BETWEEN :start_date
+                 AND :end_date
+               ;
+               """)
+
+    with engine.begin() as conn:
+        result = conn.execute(sql, {"start_date": start_date, "end_date": end_date})
+        print(f">>> 등락률 업데이트: {result.rowcount}건")
