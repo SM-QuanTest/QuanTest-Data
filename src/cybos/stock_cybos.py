@@ -6,7 +6,7 @@ from ..config.cybos_config import get_obj_cp_code_mgr
 from ..utils.utils import process_tickers
 
 
-def get_kosdaq_cybos_ticker() -> pd.DataFrame:
+def get_code_cybos_ticker() -> pd.DataFrame:
     """
     1) 모든 kosdaq_cybos_ticker의 값 가져오기
     2) df로 kosdaq_cybos_ticker 리턴

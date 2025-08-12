@@ -28,3 +28,12 @@ def fetch_chart_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
         total_data.append((cybos_ticker, date, open_price, high_price, low_price, close_price, volume))
 
     return total_data
+
+
+def did_market_open_today(today_kst_int: int, cybos_ticker: str = "A005930") -> bool:
+    check = fetch_chart_data(cybos_ticker, today_kst_int, today_kst_int)
+    print(check[0][1])
+    if check[0][1] == today_kst_int:
+        return True
+    else:
+        return False

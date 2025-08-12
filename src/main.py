@@ -1,4 +1,5 @@
 # from pathlib import Path
+import sys
 import time
 from concurrent.futures import ProcessPoolExecutor
 from itertools import repeat
@@ -7,13 +8,17 @@ from itertools import repeat
 import win32com.client
 from tqdm import tqdm
 
-from src.cybos.chart_cybos import fetch_chart_data
+from datetime import datetime, date
+from zoneinfo import ZoneInfo
+
+from src.cybos.chart_cybos import fetch_chart_data, did_market_open_today
 from src.cybos.market_cap_cybos import get_market_caps
-from src.cybos.stock_cybos import save_stock, get_kosdaq_cybos_ticker
+from src.cybos.stock_cybos import save_stock, get_code_cybos_ticker
 from src.db.chart_dl import insert_chart, update_chart_change_percentage
 from src.db.market_cap_db import upsert_market_cap
 from src.db.stock_dl import insert_stocks
 from src.utils.chart_util import process_chart_list_to_df
+from src.utils.utils import load_cybos_tickers_db
 from .cybos.sector_cybos import *
 from .db.sector_dl import *
 
@@ -56,36 +61,44 @@ def process_cybos_ticker_list(cybos_ticker: str, start_date: int, end_date: int)
 
 if __name__ == "__main__":
     InitPlusCheck()
-    kosdaq_cybos_ticker = get_kosdaq_cybos_ticker()
+    cybos_ticker_df = get_code_cybos_ticker()
+    #
+    # ######################################################
+    KST = ZoneInfo("Asia/Seoul")
+    today_kst_int = int(datetime.now(KST).strftime("%Y%m%d"))
 
-    ######################################################
-    #     # input_csv = project_root / "stockdata" / "filteredCode.csv"
-    #     # load cybos tickers
-    #     # cybos_ticker_df = load_cybos_tickers_csv(input_csv)
-    #     cybos_ticker_df = load_cybos_tickers_db()
+    if not did_market_open_today(today_kst_int) :
+        print("휴장입니다.")
+        sys.exit(0)
 
+    print("장 마감 확인")
+
+    # cybos_ticker_df = load_cybos_tickers_db()
+    #
     ############################sector###########################
-    sector_df = save_sector_name(kosdaq_cybos_ticker)
+    sector_df = save_sector_name(cybos_ticker_df)
 
     # sector db download
     insert_sectors(sector_df)
 
     ###########################stock###########################
-    stock_df = save_stock(kosdaq_cybos_ticker)
+    stock_df = save_stock(cybos_ticker_df)
 
     # stock db download
     insert_stocks(stock_df)
 
-    #########################market_cap####################
-    market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
-
-    # market_cap db download
-    upsert_market_cap(market_cap_df)
+    # #########################market_cap####################
+    # market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
+    #
+    # # market_cap db download
+    # upsert_market_cap(market_cap_df)
 
     #########################chart####################
-    cybos_ticker_list = kosdaq_cybos_ticker['cybos_ticker'].to_list()
-    start = 20150414
-    end = 20250731
+    cybos_ticker_list = cybos_ticker_df['cybos_ticker'].to_list()
+    # start = 20250801
+    # end = 20250804
+
+    start,end = today_kst_int
 
     with ProcessPoolExecutor(max_workers=4) as executor:
         for _ in tqdm(
@@ -96,7 +109,7 @@ if __name__ == "__main__":
                     repeat(end)
                 ),
                 total=len(cybos_ticker_list),
-                desc="Processing tickers"
+                desc="Processing"
         ):
             pass
 
