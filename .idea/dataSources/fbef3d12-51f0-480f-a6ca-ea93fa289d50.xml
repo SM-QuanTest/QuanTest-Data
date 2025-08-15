@@ -4,7 +4,7 @@
     <root id="1">
       <DateStyle>mdy</DateStyle>
       <ServerVersion>17.5</ServerVersion>
-      <StartupTime>1754464430</StartupTime>
+      <StartupTime>1754992927</StartupTime>
       <TimeZones>true ACDT
 true ACSST
 false ACST
@@ -4897,13 +4897,14 @@ true posixrules
     </sequence>
     <table id="274" parent="265" name="charts">
       <ObjectId>16407</ObjectId>
+      <Outdated>1</Outdated>
       <StateNumber>1371</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>quantest_user</OwnerName>
     </table>
     <table id="275" parent="265" name="daily_indicators">
       <ObjectId>16419</ObjectId>
-      <StateNumber>1371</StateNumber>
+      <StateNumber>12292</StateNumber>
       <AccessMethodId>2</AccessMethodId>
       <OwnerName>quantest_user</OwnerName>
     </table>
@@ -5062,14 +5063,34 @@ true posixrules
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="299" parent="275" name="daily_indicators_charts_fk">
+    <column id="299" parent="275" name="indicators_value">
+      <Position>3</Position>
+      <StateNumber>12290</StateNumber>
+      <StoredType>double precision|0s</StoredType>
+      <TypeId>701</TypeId>
+    </column>
+    <column id="300" parent="275" name="indicators_name">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StateNumber>12291</StateNumber>
+      <StoredType>varchar|0s</StoredType>
+      <TypeId>1043</TypeId>
+    </column>
+    <column id="301" parent="275" name="created_at">
+      <DefaultExpression>now()</DefaultExpression>
+      <Position>5</Position>
+      <StateNumber>12292</StateNumber>
+      <StoredType>timestamp|0s</StoredType>
+      <TypeId>1114</TypeId>
+    </column>
+    <foreign-key id="302" parent="275" name="daily_indicators_charts_fk">
       <ColNames>chart_id</ColNames>
       <ObjectId>16424</ObjectId>
       <StateNumber>755</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>16407</RefTableId>
     </foreign-key>
-    <index id="300" parent="275" name="daily_indicators_pk">
+    <index id="303" parent="275" name="daily_indicators_pk">
       <ColNames>id</ColNames>
       <ObjectId>16422</ObjectId>
       <Primary>1</Primary>
@@ -5077,13 +5098,13 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="301" parent="275" name="daily_indicators_pk">
+    <key id="304" parent="275" name="daily_indicators_pk">
       <ObjectId>16423</ObjectId>
       <Primary>1</Primary>
       <StateNumber>755</StateNumber>
       <UnderlyingIndexId>16422</UnderlyingIndexId>
     </key>
-    <column id="302" parent="276" name="id">
+    <column id="305" parent="276" name="id">
       <IdentityKind>always</IdentityKind>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -5092,14 +5113,14 @@ true posixrules
       <SequenceId>24700</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="303" parent="276" name="cap">
+    <column id="306" parent="276" name="cap">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>1357</StateNumber>
       <StoredType>integer|0s</StoredType>
       <TypeId>23</TypeId>
     </column>
-    <column id="304" parent="276" name="updated_at">
+    <column id="307" parent="276" name="updated_at">
       <DefaultExpression>now()</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>3</Position>
@@ -5107,21 +5128,21 @@ true posixrules
       <StoredType>timestamp with time zone|0s</StoredType>
       <TypeId>1184</TypeId>
     </column>
-    <column id="305" parent="276" name="stock_id">
+    <column id="308" parent="276" name="stock_id">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StateNumber>1358</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="306" parent="276" name="market_caps_stocks_fk">
+    <foreign-key id="309" parent="276" name="market_caps_stocks_fk">
       <ColNames>stock_id</ColNames>
       <ObjectId>24765</ObjectId>
       <StateNumber>1387</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>16396</RefTableId>
     </foreign-key>
-    <index id="307" parent="276" name="market_caps_pk">
+    <index id="310" parent="276" name="market_caps_pk">
       <ColNames>id</ColNames>
       <ObjectId>24705</ObjectId>
       <Primary>1</Primary>
@@ -5129,25 +5150,25 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="308" parent="276" name="market_caps_unique_1">
+    <index id="311" parent="276" name="market_caps_unique_1">
       <ColNames>stock_id</ColNames>
       <ObjectId>24714</ObjectId>
       <StateNumber>1372</StateNumber>
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="309" parent="276" name="market_caps_pk">
+    <key id="312" parent="276" name="market_caps_pk">
       <ObjectId>24706</ObjectId>
       <Primary>1</Primary>
       <StateNumber>1357</StateNumber>
       <UnderlyingIndexId>24705</UnderlyingIndexId>
     </key>
-    <key id="310" parent="276" name="market_caps_unique_1">
+    <key id="313" parent="276" name="market_caps_unique_1">
       <ObjectId>24715</ObjectId>
       <StateNumber>1363</StateNumber>
       <UnderlyingIndexId>24714</UnderlyingIndexId>
     </key>
-    <column id="311" parent="277" name="id">
+    <column id="314" parent="277" name="id">
       <IdentityKind>always</IdentityKind>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -5156,28 +5177,28 @@ true posixrules
       <SequenceId>16457</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="312" parent="277" name="record_id">
+    <column id="315" parent="277" name="record_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>1094</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="313" parent="277" name="pattern_id">
+    <column id="316" parent="277" name="pattern_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StateNumber>1094</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="314" parent="277" name="pattern_record_date">
+    <column id="317" parent="277" name="pattern_record_date">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StateNumber>1094</StateNumber>
       <StoredType>date|0s</StoredType>
       <TypeId>1082</TypeId>
     </column>
-    <column id="315" parent="277" name="created_at">
+    <column id="318" parent="277" name="created_at">
       <DefaultExpression>now()</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>5</Position>
@@ -5185,21 +5206,21 @@ true posixrules
       <StoredType>timestamp with time zone|0s</StoredType>
       <TypeId>1184</TypeId>
     </column>
-    <foreign-key id="316" parent="277" name="pattern_records_records_fk">
+    <foreign-key id="319" parent="277" name="pattern_records_records_fk">
       <ColNames>record_id</ColNames>
       <ObjectId>16464</ObjectId>
       <StateNumber>1094</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>16438</RefTableId>
     </foreign-key>
-    <foreign-key id="317" parent="277" name="pattern_records_patterns_fk">
+    <foreign-key id="320" parent="277" name="pattern_records_patterns_fk">
       <ColNames>pattern_id</ColNames>
       <ObjectId>16469</ObjectId>
       <StateNumber>1094</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>16430</RefTableId>
     </foreign-key>
-    <index id="318" parent="277" name="pattern_records_pk">
+    <index id="321" parent="277" name="pattern_records_pk">
       <ColNames>id</ColNames>
       <ObjectId>16462</ObjectId>
       <Primary>1</Primary>
@@ -5207,13 +5228,13 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="319" parent="277" name="pattern_records_pk">
+    <key id="322" parent="277" name="pattern_records_pk">
       <ObjectId>16463</ObjectId>
       <Primary>1</Primary>
       <StateNumber>1094</StateNumber>
       <UnderlyingIndexId>16462</UnderlyingIndexId>
     </key>
-    <column id="320" parent="278" name="id">
+    <column id="323" parent="278" name="id">
       <IdentityKind>always</IdentityKind>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -5222,32 +5243,32 @@ true posixrules
       <SequenceId>16429</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="321" parent="278" name="pattern_name">
+    <column id="324" parent="278" name="pattern_name">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>759</StateNumber>
       <StoredType>varchar(50)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="322" parent="278" name="pattern_direction">
+    <column id="325" parent="278" name="pattern_direction">
       <Position>3</Position>
       <StateNumber>761</StateNumber>
       <StoredType>varchar(10)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="323" parent="278" name="pattern_rule">
+    <column id="326" parent="278" name="pattern_rule">
       <Position>4</Position>
       <StateNumber>766</StateNumber>
       <StoredType>text|0s</StoredType>
       <TypeId>25</TypeId>
     </column>
-    <column id="324" parent="278" name="pattern_signal">
+    <column id="327" parent="278" name="pattern_signal">
       <Position>5</Position>
       <StateNumber>764</StateNumber>
       <StoredType>text|0s</StoredType>
       <TypeId>25</TypeId>
     </column>
-    <index id="325" parent="278" name="patterns_pk">
+    <index id="328" parent="278" name="patterns_pk">
       <ColNames>id</ColNames>
       <ObjectId>16435</ObjectId>
       <Primary>1</Primary>
@@ -5255,13 +5276,13 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="326" parent="278" name="patterns_pk">
+    <key id="329" parent="278" name="patterns_pk">
       <ObjectId>16436</ObjectId>
       <Primary>1</Primary>
       <StateNumber>756</StateNumber>
       <UnderlyingIndexId>16435</UnderlyingIndexId>
     </key>
-    <column id="327" parent="279" name="id">
+    <column id="330" parent="279" name="id">
       <IdentityKind>always</IdentityKind>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -5270,42 +5291,42 @@ true posixrules
       <SequenceId>16437</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="328" parent="279" name="chart_id">
+    <column id="331" parent="279" name="chart_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>757</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <column id="329" parent="279" name="record_direction">
+    <column id="332" parent="279" name="record_direction">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StateNumber>777</StateNumber>
       <StoredType>char|0s</StoredType>
       <TypeId>1042</TypeId>
     </column>
-    <column id="330" parent="279" name="record_prediction">
+    <column id="333" parent="279" name="record_prediction">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StateNumber>1090</StateNumber>
       <StoredType>double precision|0s</StoredType>
       <TypeId>701</TypeId>
     </column>
-    <column id="331" parent="279" name="created_at">
+    <column id="334" parent="279" name="created_at">
       <DefaultExpression>now()</DefaultExpression>
       <Position>6</Position>
       <StateNumber>1093</StateNumber>
       <StoredType>timestamp with time zone|0s</StoredType>
       <TypeId>1184</TypeId>
     </column>
-    <foreign-key id="332" parent="279" name="records_charts_fk">
+    <foreign-key id="335" parent="279" name="records_charts_fk">
       <ColNames>chart_id</ColNames>
       <ObjectId>16444</ObjectId>
       <StateNumber>757</StateNumber>
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>16407</RefTableId>
     </foreign-key>
-    <index id="333" parent="279" name="records_pk">
+    <index id="336" parent="279" name="records_pk">
       <ColNames>id</ColNames>
       <ObjectId>16442</ObjectId>
       <Primary>1</Primary>
@@ -5313,13 +5334,18 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="334" parent="279" name="records_pk">
+    <key id="337" parent="279" name="records_pk">
       <ObjectId>16443</ObjectId>
       <Primary>1</Primary>
       <StateNumber>757</StateNumber>
       <UnderlyingIndexId>16442</UnderlyingIndexId>
     </key>
-    <column id="335" parent="280" name="id">
+    <key id="338" parent="279" name="chart_id_unique">
+      <ObjectId>41168</ObjectId>
+      <StateNumber>10486</StateNumber>
+      <UnderlyingIndexId>41167</UnderlyingIndexId>
+    </key>
+    <column id="339" parent="280" name="id">
       <IdentityKind>always</IdentityKind>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -5328,14 +5354,14 @@ true posixrules
       <SequenceId>16389</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="336" parent="280" name="sector_name">
+    <column id="340" parent="280" name="sector_name">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>767</StateNumber>
       <StoredType>varchar(50)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <index id="337" parent="280" name="sectors_pk">
+    <index id="341" parent="280" name="sectors_pk">
       <ColNames>id</ColNames>
       <ObjectId>16393</ObjectId>
       <Primary>1</Primary>
@@ -5343,7 +5369,7 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <index id="338" parent="280" name="sectors_unique">
+    <index id="342" parent="280" name="sectors_unique">
       <ColNames>sector_name</ColNames>
       <ObjectId>16508</ObjectId>
       <StateNumber>1370</StateNumber>
@@ -5353,18 +5379,18 @@ true posixrules
       <CollationIds>100</CollationIds>
       <CollationParentNames>pg_catalog</CollationParentNames>
     </index>
-    <key id="339" parent="280" name="sectors_pk">
+    <key id="343" parent="280" name="sectors_pk">
       <ObjectId>16394</ObjectId>
       <Primary>1</Primary>
       <StateNumber>752</StateNumber>
       <UnderlyingIndexId>16393</UnderlyingIndexId>
     </key>
-    <key id="340" parent="280" name="sectors_unique">
+    <key id="344" parent="280" name="sectors_unique">
       <ObjectId>16509</ObjectId>
       <StateNumber>1348</StateNumber>
       <UnderlyingIndexId>16508</UnderlyingIndexId>
     </key>
-    <column id="341" parent="281" name="id">
+    <column id="345" parent="281" name="id">
       <IdentityKind>always</IdentityKind>
       <NotNull>1</NotNull>
       <Position>1</Position>
@@ -5373,27 +5399,27 @@ true posixrules
       <SequenceId>16395</SequenceId>
       <TypeId>20</TypeId>
     </column>
-    <column id="342" parent="281" name="ticker">
+    <column id="346" parent="281" name="ticker">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StateNumber>753</StateNumber>
       <StoredType>varchar(6)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="343" parent="281" name="stock_name">
+    <column id="347" parent="281" name="stock_name">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StateNumber>768</StateNumber>
       <StoredType>varchar(50)|0s</StoredType>
       <TypeId>1043</TypeId>
     </column>
-    <column id="344" parent="281" name="sector_id">
+    <column id="348" parent="281" name="sector_id">
       <Position>4</Position>
       <StateNumber>753</StateNumber>
       <StoredType>bigint|0s</StoredType>
       <TypeId>20</TypeId>
     </column>
-    <foreign-key id="345" parent="281" name="stocks_sectors_fk_1">
+    <foreign-key id="349" parent="281" name="stocks_sectors_fk_1">
       <ColNames>sector_id</ColNames>
       <ObjectId>16401</ObjectId>
       <OnDelete>set-null</OnDelete>
@@ -5402,7 +5428,7 @@ true posixrules
       <RefKeyColPositions>1</RefKeyColPositions>
       <RefTableId>16390</RefTableId>
     </foreign-key>
-    <index id="346" parent="281" name="stocks_pk">
+    <index id="350" parent="281" name="stocks_pk">
       <ColNames>id</ColNames>
       <ObjectId>16399</ObjectId>
       <Primary>1</Primary>
@@ -5410,7 +5436,7 @@ true posixrules
       <Unique>1</Unique>
       <AccessMethodId>403</AccessMethodId>
     </index>
-    <key id="347" parent="281" name="stocks_pk">
+    <key id="351" parent="281" name="stocks_pk">
       <ObjectId>16400</ObjectId>
       <Primary>1</Primary>
       <StateNumber>753</StateNumber>

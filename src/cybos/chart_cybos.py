@@ -2,6 +2,12 @@ from src.config.cybos_config import get_obj_stock_chart
 
 
 def fetch_chart_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
+    """
+    1) cybos_ticker, 시작date, 종료date 입력
+    2) cybos_api 이용해 데이터 수집
+    3) 튜플값들을 가진 list로 total_data return
+    """
+
     objStockChart = get_obj_stock_chart()
     total_data = []
 
