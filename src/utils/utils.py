@@ -24,6 +24,7 @@ def load_cybos_tickers_db() -> pd.DataFrame:
     df['cybos_ticker'] = 'A' + df['ticker']
     return df[['cybos_ticker']]
 
+
 def load_cybos_tickers_csv(input_csv: Path) -> pd.DataFrame:
     """
     1) input_csv를 읽어서
@@ -48,4 +49,14 @@ def process_cybos_tickers(ticker: str) -> str:
     2) 'A'를 붙인 cybos ticker str 리턴
     """
 
-    return 'A'+ticker
+    return 'A' + ticker
+
+
+def cybos_ticker_list_to_df(cybos_ticker_list: list) -> pd.DataFrame:
+    """
+    1) cybos_ticker_list를 입력받아서
+    2) cybos_ticker df로 변환 후 리턴
+    """
+    df = pd.DataFrame()
+    df['cybos_ticker'] = cybos_ticker_list
+    return df

@@ -1,7 +1,7 @@
 from src.config.cybos_config import get_obj_stock_chart
 
 
-def fetch_chart_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
+def fetch_cybos_chart_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
     """
     1) cybos_ticker, 시작date, 종료date 입력
     2) cybos_api 이용해 데이터 수집
@@ -36,9 +36,15 @@ def fetch_chart_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
     return total_data
 
 
-def did_market_open_today(today_kst_int: int, cybos_ticker: str = "A005930") -> bool:
-    check = fetch_chart_data(cybos_ticker, today_kst_int, today_kst_int)
-    print(check[0][1])
+def did_market_open_today(today_kst_int: int, cybos_ticker: str) -> bool:
+    """
+        1) 오늘 날짜, cybos_ticker 입력
+        2) cybos_ticker로 데이터 수신 후 장 날짜 체크
+        3) 결과값 리턴
+        """
+
+    check = fetch_cybos_chart_data(cybos_ticker, today_kst_int, today_kst_int)
+    print("최근 장 일시: ", check[0][1])
     if check[0][1] == today_kst_int:
         return True
     else:

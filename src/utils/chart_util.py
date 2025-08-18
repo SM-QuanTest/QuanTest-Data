@@ -27,7 +27,7 @@ def process_chart_list_to_df(chart_list: list) -> pd.DataFrame:
     chart_df['chart_date'] = pd.to_datetime(
         chart_df['chart_date'].astype(str),
         format='%Y%m%d'
-    )
+    ).dt.date
     chart_df['chart_turnover'] = chart_df['chart_close'] * chart_df['chart_volume']
 
     return chart_df

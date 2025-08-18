@@ -1,35 +1,28 @@
 # from pathlib import Path
 import faulthandler;
 
+from src.config.config import CYBOS_TICKER_LIST
+
 faulthandler.enable()
 
 import sys
 import time
-from concurrent.futures import ProcessPoolExecutor
-from itertools import repeat
 
-import pythoncom
-# from tabulate import tabulate
 import win32com.client
 from tqdm import tqdm
 
-from datetime import datetime, date
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from src.cybos.chart_cybos import fetch_chart_data, did_market_open_today
-from src.cybos.indicators_cybos import fetch_indicator_data, get_all_index_names
-from src.cybos.market_cap_cybos import get_market_caps
-from src.cybos.stock_cybos import save_stock, get_code_cybos_ticker
-from src.db.chart_db import insert_chart, update_chart_change_percentage
-from src.db.market_cap_db import upsert_market_cap
+from src.cybos.chart_cybos import fetch_cybos_chart_data, did_market_open_today
+from src.cybos.indicators_cybos import fetch_cybos_indicator_data
+from src.cybos.stock_cybos import save_stock
+from src.db.chart_db import insert_chart, update_chart_change_percentage, fetch_chart_to_df_by_date
 from src.db.stock_dl import insert_stocks
 from src.utils.chart_util import process_chart_list_to_df
-from src.utils.utils import load_cybos_tickers_db
+from src.utils.utils import cybos_ticker_list_to_df
 from .cybos.sector_cybos import *
 from .db.sector_dl import *
-
-
-# project_root = Path(os.getenv("PROJECT_ROOT"))
 
 
 def InitPlusCheck():
@@ -56,101 +49,131 @@ def chart_process_cybos_ticker_list(cybos_ticker: str, start_date: int, end_date
     3) chart_data list
     4) list를 df로 변환
     5) db에 chart 데이터 삽입
-    수정필요
     """
-    # time.sleep(1.0) #15초 60건 제한
+
+    # time.sleep(1.0)  # 15초 60건 제한
     time.sleep(0.2)
 
-    hist_list = fetch_chart_data(cybos_ticker, start_date, end_date)
-    chart_df = process_chart_list_to_df(hist_list)
+    # print("RAW:", repr(cybos_ticker))
+    # code = cybos_ticker.strip().upper()
+    # print("CLEAN:", repr(code))
+    # print("Name:", get_obj_cp_code_mgr().CodeToName(code))
+    try:
+        name = get_obj_cp_code_mgr().CodeToName(cybos_ticker)
+    except Exception as e:
+        print(f"[SKIP] CodeToName 예외: code={repr(cybos_ticker)} err={e}")
+        return False
+    if not name:
+        print(f"[SKIP] 유효하지 않은(또는 상폐) 코드: {repr(cybos_ticker)}")
+        return False
 
-    insert_chart_df = insert_chart(chart_df)
+    hist_list = fetch_cybos_chart_data(cybos_ticker, start_date, end_date)
+    hist_df = process_chart_list_to_df(hist_list)
+
+    print(hist_df.head())
+    insert_chart(hist_df)
 
 
-    if (insert_chart_df.empty):
-        print(">>> 지표를 넣을 신규 chart 데이터가 없습니다.")
+def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end_date: int):
+    """
+    1) cybos_ticker, 시작date, 종료date 입력
+    2) cybos api 호출 제한 - sleep 설정
+    3) chart_data list
+    4) list를 df로 변환
+    5) db에 chart 데이터 삽입
+    """
+
+    time.sleep(0.2)
+    # time.sleep(1.0)  # 15초 60건 제한
+
+    try:
+        get_obj_cp_code_mgr().CodeToName(cybos_ticker)
+    except Exception as e:
+        print(f"유효하지 않은 종목코드 에러 발생: {e}")
         return
 
-    daily_indicator_df = fetch_indicator_data(insert_chart_df)
-    print("지표데이터")
+    indicator_df = fetch_cybos_indicator_data(cybos_ticker, start_date, end_date)
 
-    # insert_daily_indicator(daily_indicator_df)
-
-    return None
-
+    print(indicator_df.head())
+    # insert_chart(indicator_df)
 
 
 # TODO: 나중에 main()으로 변경
 if __name__ == "__main__":
-    pythoncom.CoInitialize()
-    try:
-        InitPlusCheck()
+    InitPlusCheck()
 
-        cybos_ticker_df = get_code_cybos_ticker()
-        print(get_all_index_names())
+    # cybos_ticker_df = get_code_cybos_ticker()
+    # cybos_ticker_df = load_cybos_tickers_db()
+    cybos_ticker_df = cybos_ticker_list_to_df(CYBOS_TICKER_LIST)
 
-        #
-        # # ######################################################
-        # KST = ZoneInfo("Asia/Seoul")
-        # today_kst_int = int(datetime.now(KST).strftime("%Y%m%d"))
-        #
-        # if not did_market_open_today(today_kst_int) :
-        #     print("휴장입니다.")
-        #     sys.exit(0)
-        #
-        # print("장 마감 확인")
-        #
-        # # cybos_ticker_df = load_cybos_tickers_db()
-        # #
-        # ############################sector###########################
-        # sector_df = save_sector_name(cybos_ticker_df)
-        #
-        # # sector db download
-        # insert_sectors(sector_df)
-        #
-        # ###########################stock###########################
-        # stock_df = save_stock(cybos_ticker_df)
-        #
-        # # stock db download
-        # insert_stocks(stock_df)
-        #
-        # # #########################market_cap####################
-        # # market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
-        # #
-        # # # market_cap db download
-        # # upsert_market_cap(market_cap_df)
-        #
-        # #########################chart####################
-        cybos_ticker_list = cybos_ticker_df['cybos_ticker'].to_list()
-        start = 20250807
-        end = 20250807
-        #
-        # start,end = today_kst_int
+    # ######################################################
+    KST = ZoneInfo("Asia/Seoul")
+    today_kst_int = int(datetime.now(KST).strftime("%Y%m%d"))
+    print("오늘 날짜: ", today_kst_int)
 
-        # for t in tqdm(cybos_ticker_list, total=len(cybos_ticker_list), desc="Processing"):
-        #     chart_process_cybos_ticker_list(t, start, end)
-        for t in cybos_ticker_list:
-            chart_process_cybos_ticker_list(t, start, end)
+    if not did_market_open_today(today_kst_int, CYBOS_TICKER_LIST[0]):
+        print("오늘은 휴장입니다.")
+        sys.exit(0)
 
+    print("오늘자 장 마감 확인")
+
+    ############################sector###########################
+    sector_df = save_sector_name(cybos_ticker_df)
+    print(sector_df.head())
+
+    # sector db download
+    insert_sectors(sector_df)
+
+    # ###########################stock###########################
+    stock_df = save_stock(cybos_ticker_df)
+
+    # stock db download
+    insert_stocks(stock_df)
+
+    # #########################market_cap####################
+    #     market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
+    #
+    #     # market_cap db download
+    #     upsert_market_cap(market_cap_df)
+    #     #
+    # #########################chart####################
+    start = 20250807
+    end = 20250807
+    #
+    # start,end = today_kst_int
+
+    for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
+        chart_process_cybos_ticker_list(t, start, end)
+
+    # 여기서 조회 확인, 만약 업데이트된 차트 없으면 exit
+    chart_df = fetch_chart_to_df_by_date(start, end)
+    if (chart_df is None) or (chart_df.empty):
+        print("추가된 차트 데이터가 없어서 프로그램을 종료합니다.")
+        sys.exit(0)
+
+    update_chart_change_percentage(start, end)
+
+    ########################daily_indicators####################
+    # db에서 start, end 기간 가지는 df 불러온 다음, 지표 df 불러오기
+
+    indicator_input_df = (
+        chart_df[['id', 'chart_date', 'stock_id']]
+        .sort_values(['stock_id', 'chart_date'])
+        .reset_index(drop=True)
+    )
+
+    print(indicator_input_df)
+
+    for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
+        indicator_process_indicator_input_df(t, start, end)
+
+        #############################################
+
+        # if (insert_chart_df.empty):
+        #     print(">>> 지표를 넣을 신규 chart 데이터가 없습니다.")
+        #     return
         #
-        # with ProcessPoolExecutor(max_workers=4) as executor:
-        #     for _ in tqdm(
-        #             executor.map(
-        #                 process_cybos_ticker_list,
-        #                 cybos_ticker_list,
-        #                 repeat(start),
-        #                 repeat(end)
-        #             ),
-        #             total=len(cybos_ticker_list),
-        #             desc="Processing"
-        #     ):
-        #         pass
-        #
+        # daily_indicator_df = fetch_indicator_data(insert_chart_df)
+        # print("지표데이터")
 
-        # update_chart_change_percentage(start, end)
-        #
-        # #########################daily_indicators####################
-
-
-    finally:
-        pythoncom.CoUninitialize()
+        # insert_daily_indicator(daily_indicator_df)
