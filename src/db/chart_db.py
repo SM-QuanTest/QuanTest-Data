@@ -9,8 +9,6 @@ from sqlalchemy import text
 from src.db.database import engine
 from src.utils.utils import process_tickers
 
-MAX_I8 = 2 ** 63 - 1
-
 
 def insert_chart(input_df: pd.DataFrame):
     """
@@ -18,7 +16,6 @@ def insert_chart(input_df: pd.DataFrame):
     2) chart_date 타입 변환
     3) stocks 테이블에서 stock_id 매핑
     4) db에 INSERT, 중복 무시
-    5) 날짜 오름차순 df 리턴 -> "chart_id", "chart_date", "stock_id"
     """
 
     df = input_df.copy()

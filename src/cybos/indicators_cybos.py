@@ -104,6 +104,7 @@ def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int
     print(df.head())
     chart_df = None
     all_index_names = get_all_index_names()
+    #TODO: .env에 지표리스트 저장
     daily_indicator_list = []
 
     for row in df.itertuples(index=False):

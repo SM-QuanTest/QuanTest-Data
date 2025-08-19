@@ -2,6 +2,7 @@
 import faulthandler;
 
 from src.config.config import CYBOS_TICKER_LIST
+from src.db.indicators_db import insert_indicator
 
 faulthandler.enable()
 
