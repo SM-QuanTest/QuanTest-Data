@@ -19,8 +19,7 @@ from src.cybos.indicators_cybos import fetch_cybos_indicator_data
 from src.cybos.stock_cybos import save_stock
 from src.db.chart_db import insert_chart, update_chart_change_percentage, fetch_chart_to_df_by_date
 from src.db.stock_dl import insert_stocks
-from src.utils.chart_util import process_chart_list_to_df
-from src.utils.utils import cybos_ticker_list_to_df
+from src.utils.utils import cybos_ticker_list_to_df, process_chart_list_to_df, process_indicator_df_to_long_df
 from .cybos.sector_cybos import *
 from .db.sector_dl import *
 
@@ -95,7 +94,9 @@ def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end
     indicator_df = fetch_cybos_indicator_data(cybos_ticker, start_date, end_date)
 
     print(indicator_df.head())
-    # insert_chart(indicator_df)
+
+    long_indicator_df = process_indicator_df_to_long_df(indicator_df)
+    insert_indicator(long_indicator_df)
 
 
 # TODO: 나중에 main()으로 변경
@@ -104,6 +105,7 @@ if __name__ == "__main__":
 
     # cybos_ticker_df = get_code_cybos_ticker()
     # cybos_ticker_df = load_cybos_tickers_db()
+
     cybos_ticker_df = cybos_ticker_list_to_df(CYBOS_TICKER_LIST)
 
     # ######################################################
@@ -118,17 +120,17 @@ if __name__ == "__main__":
     print("오늘자 장 마감 확인")
 
     ############################sector###########################
-    sector_df = save_sector_name(cybos_ticker_df)
-    print(sector_df.head())
+    # sector_df = save_sector_name(cybos_ticker_df)
+    # print(sector_df.head())
 
     # sector db download
-    insert_sectors(sector_df)
+    # insert_sectors(sector_df)
 
     # ###########################stock###########################
-    stock_df = save_stock(cybos_ticker_df)
-
-    # stock db download
-    insert_stocks(stock_df)
+    # stock_df = save_stock(cybos_ticker_df)
+    #
+    # # stock db download
+    # insert_stocks(stock_df)
 
     # #########################market_cap####################
     #     market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
@@ -141,6 +143,7 @@ if __name__ == "__main__":
     end = 20250807
     #
     # start,end = today_kst_int
+
 
     for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
         chart_process_cybos_ticker_list(t, start, end)
@@ -168,12 +171,3 @@ if __name__ == "__main__":
         indicator_process_indicator_input_df(t, start, end)
 
         #############################################
-
-        # if (insert_chart_df.empty):
-        #     print(">>> 지표를 넣을 신규 chart 데이터가 없습니다.")
-        #     return
-        #
-        # daily_indicator_df = fetch_indicator_data(insert_chart_df)
-        # print("지표데이터")
-
-        # insert_daily_indicator(daily_indicator_df)

@@ -26,7 +26,7 @@ def calculate_all_indexes(input_df: pd.DataFrame, index_names: list) -> pd.DataF
     1) 60일 + 입력받은 날짜/종목 해당하는 df, 지표 리스트 입력
     2) 오름차순 날짜 순서대로 obj_cp_series에 add
     3) 지표 리스트 돌며 지표 계산, 60일치 제외한 데이터만 dict 형태로 넣기
-    4) 구하는 날짜 df만 합쳐서 리턴
+    4) 구하는 날짜 df만 합쳐서 리턴 (only chart_id)
     """
 
     df = input_df.copy().reset_index(drop=True)
@@ -79,14 +79,14 @@ def calculate_all_indexes(input_df: pd.DataFrame, index_names: list) -> pd.DataF
     original_df = df[60:].reset_index(drop=True)
     print(original_df.head())
 
-    calculate_df = pd.concat([original_df, index_data_to_df], axis=1)
+    calculate_df = pd.concat([original_df[["chart_id"]], index_data_to_df], axis=1)
     return calculate_df
 
 
 def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
     """
     1) cybos_ticker, start/end date 입력
-    2) 해당 값들을 가지고있는 df 찾기
+    2) 해당 값들을 가지고있는 df 찾기(날짜,시고저종거래량,id,stock_id df)
     3) df 이전 60일치 값들 불러온 뒤 합치기
     4) 지표값 계산 후 df 리턴
     """
