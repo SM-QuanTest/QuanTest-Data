@@ -13,5 +13,4 @@ DB_URL = os.getenv("DB_URL")
 # CRON_EXPR    = os.getenv("CRON_EXPR", "0 0 * * *")  # 기본: 매일 자정
 PROJECT_ROOT = os.getenv("PROJECT_ROOT")
 
-CYBOS_TICKER_STR = os.getenv("CYBOS_TICKER_LIST")
-CYBOS_TICKER_LIST = json.loads(CYBOS_TICKER_STR)
+CYBOS_TICKER_LIST = json.loads(os.getenv("CYBOS_TICKER_LIST"))
