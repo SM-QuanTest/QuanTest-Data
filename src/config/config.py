@@ -24,3 +24,4 @@ DB_URL = os.getenv("DB_URL")
 PROJECT_ROOT = os.getenv("PROJECT_ROOT")
 
 CYBOS_TICKER_LIST = json.loads(os.getenv("CYBOS_TICKER_LIST"))
+CYBOS_INDICATOR_LIST = json.loads(os.getenv("CYBOS_INDICATOR_LIST"))

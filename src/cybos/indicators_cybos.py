@@ -3,6 +3,8 @@ import pandas as pd
 from src.config.cybos_config import create_obj_cp_series, create_obj_cp_index, get_obj_cp_code_mgr
 from src.db.chart_db import select_previous_chart, fetch_chart_to_df_by_ticker_and_date
 
+from typing import Dict, List
+
 
 def get_all_index_names() -> list:
     """
@@ -19,6 +21,79 @@ def get_all_index_names() -> list:
             print(f"카테고리 {category} 처리 중 오류 발생:", e)
 
     return all_index_names
+
+LINE_NAMES: Dict[str, List[str]] = {
+    # 가격지표
+    "이동평균(라인3개)": ["단기 이동평균", "중기 이동평균", "장기 이동평균"],
+    "고저이동평균": ["고가이평", "저가이평"],
+    "일목균형표": ["전환선", "기준선", "선행스팬1", "선행스팬2", "후행스팬"],
+    "Bollinger Band": ["Boll 상한선", "Boll 중앙선", "Boll 하한선"],
+    "중간값(Median Price)": ["중간값"],
+    "DEMA": ["DEMA"],
+    "Envelope": ["Env 상한선", "Env 중앙선", "Env 하한선"],
+    "Price Channel": ["P.C 상한선", "하한선", "중앙선"],
+    "Projection Bands": ["Prj 상한선", "Prj 하한선"],
+    "대표값(Typical Price)": ["대표값"],
+    "VIDYA": ["VIDYA", "Signal"],
+
+    # 추세지표
+    "DMI": ["+DI", "-DI", "ADX", "ADXR"],
+    "Aroon": ["Aroon Up", "Aroon Down"],
+    "Aroon Osillator": ["Aroon Osillator"],
+    "CCI": ["CCI", "Signal"],
+    "Elder-Ray": ["Bull Power", "Bear Power"],
+    "Force Index": ["단기 FI", "장기 FI"],
+    "MACD": ["MACD", "Signal", "Oscillator"],
+    "MAO": ["MAO", "Signal"],
+    "MFI": ["MFI", "Signal"],
+    "SONAR": ["SONAR", "Signal"],
+    "TRIX": ["TRIX", "Signal"],
+    "TSI": ["TSI", "Signal"],
+    "VHF": ["VHF", "Signal"],
+
+    # 변동성지표
+    "ATR": ["ATR", "Signal"],
+    "Chaikin's Volatility": ["Chaikin's Volatility"],
+    "Relative Volatility Index": ["RVI", "Signal"],
+    "Inertia": ["Inertia", "Signal"],
+
+    # 모멘텀지표
+    "이격도": ["이격도1", "이격도2", "이격도3", "이격도4"],
+    "Ease of Movement": ["EOM", "Signal"],
+    "Chande Momentum Oscillator": ["CMO"],
+    "DPO": ["DPO"],
+    "Mass Index": ["Mass Index", "Signal"],
+    "Momentum": ["Momentum", "Signal"],
+    "Negative Volume Index": ["NVI", "Signal"],
+    "RSI": ["RSI", "Signal"],
+    "SMI": ["SMI", "Signal"],
+    "Stochastic Fast": ["Fast %K", "Fast %D"],
+    "Stochastic Slow": ["Slow %K", "Slow %D"],
+    "Ultimate Oscillator": ["UOSC", "Signal"],
+
+    # 시장강도/거래량
+    "Chaikin's Money Flow": ["Chaikin's Money Flow"],
+    "Williams Accumulation Distribution": ["Williams Accumulation Distribution", "Signal"],
+    "Volume Oscillator": ["VO", "Signal"],
+
+    # 업종분석
+    "A/D Line": ["A/D Line", "Signal"],
+    "McCellan Oscillator": ["McCellan Oscillator"],
+}
+
+
+def findLineName(index_name:str, i:int) -> str:
+    """
+    1) 지표 이름과 지표 라인 순서를 입력받는다
+    2) 정해진 라인이름을 출력, 없을 경우엔 index_name_int로 출력
+    """
+
+    lines = LINE_NAMES.get(index_name)
+    if not lines:
+        return f"{index_name}_{i}"
+    if 0 <= i < len(lines):
+        return lines[i]
+    return f"{index_name}_{i}"
 
 
 def calculate_all_indexes(input_df: pd.DataFrame, index_names: list) -> pd.DataFrame:
@@ -47,8 +122,6 @@ def calculate_all_indexes(input_df: pd.DataFrame, index_names: list) -> pd.DataF
 
     for idx, index_name in enumerate(index_names):
         # TODO: 지표 필터링
-        if idx in [2, 103, 160]:
-            continue
         try:
             print(f"[{idx}/{len(index_names)}] ⏳ {index_name} 계산 중...")
             obj_cp_index = create_obj_cp_index()
@@ -58,15 +131,19 @@ def calculate_all_indexes(input_df: pd.DataFrame, index_names: list) -> pd.DataF
 
             obj_cp_index.Calculate()
 
-            # 지표가 몇 개의 라인을 가지고 있는지
+            # 지표가 몇 개의 라인을 가지고 있는지(지표개수)
             item_count = obj_cp_index.ItemCount
+            print("라인 수: ", item_count)
 
+            #####################################################
             for i in range(item_count):
                 get_count = obj_cp_index.GetCount(i)
                 vals = [obj_cp_index.GetResult(i, j) for j in range(get_count)]
                 vals = vals[60:]
 
-                colname = f"{index_name}_{i}"
+                # vals = obj_cp_index.GetResult(i, get_count - 1)
+
+                colname = findLineName(index_name, i);
                 index_data[colname] = vals
 
         except Exception as e:
@@ -83,7 +160,7 @@ def calculate_all_indexes(input_df: pd.DataFrame, index_names: list) -> pd.DataF
     return calculate_df
 
 
-def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int) -> list:
+def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int, cybos_indicator_list: list) -> list:
     """
     1) cybos_ticker, start/end date 입력
     2) 해당 값들을 가지고있는 df 찾기(날짜,시고저종거래량,id,stock_id df)
@@ -95,17 +172,16 @@ def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int
         name = get_obj_cp_code_mgr().CodeToName(cybos_ticker)
     except Exception as e:
         print(f"[SKIP] CodeToName 예외: code={repr(cybos_ticker)} err={e}")
-        return False  # ← 여기서 바로 함수 종료
+        return None
     if not name:
         print(f"[SKIP] 유효하지 않은(또는 상폐) 코드: {repr(cybos_ticker)}")
-        return False  # ← 여기서 바로 함수 종료
+        return None
 
     df = fetch_chart_to_df_by_ticker_and_date(cybos_ticker, start_date, end_date)
     print(df.head())
     chart_df = None
-    all_index_names = get_all_index_names()
-    #TODO: .env에 지표리스트 저장
-    daily_indicator_list = []
+    # all_index_names = get_all_index_names()
+    all_index_names = cybos_indicator_list
 
     for row in df.itertuples(index=False):
         stock_id = int(row.stock_id)
@@ -122,6 +198,7 @@ def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int
     if (chart_df is None) or (chart_df.empty):
         return None
 
+###########################################################################
     calculate_df = calculate_all_indexes(chart_df, all_index_names)
 
     print(calculate_df.head())

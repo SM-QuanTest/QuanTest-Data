@@ -1,7 +1,7 @@
 # from pathlib import Path
 import faulthandler;
 
-from src.config.config import CYBOS_TICKER_LIST
+from src.config.config import CYBOS_TICKER_LIST, CYBOS_INDICATOR_LIST
 from src.db.indicators_db import insert_indicator
 
 faulthandler.enable()
@@ -23,6 +23,17 @@ from src.db.stock_dl import insert_stocks
 from src.utils.utils import cybos_ticker_list_to_df, process_chart_list_to_df, process_indicator_df_to_long_df
 from .cybos.sector_cybos import *
 from .db.sector_dl import *
+
+import os, sys, builtins, functools
+os.environ.setdefault("PYTHONUNBUFFERED", "1")
+os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+try:
+    sys.stdout.reconfigure(line_buffering=True, encoding="utf-8")
+    sys.stderr.reconfigure(line_buffering=True, encoding="utf-8")
+except Exception:
+    pass
+builtins.print = functools.partial(builtins.print, flush=True)
+
 
 
 def InitPlusCheck():
@@ -54,10 +65,6 @@ def chart_process_cybos_ticker_list(cybos_ticker: str, start_date: int, end_date
     # time.sleep(1.0)  # 15초 60건 제한
     time.sleep(0.2)
 
-    # print("RAW:", repr(cybos_ticker))
-    # code = cybos_ticker.strip().upper()
-    # print("CLEAN:", repr(code))
-    # print("Name:", get_obj_cp_code_mgr().CodeToName(code))
     try:
         name = get_obj_cp_code_mgr().CodeToName(cybos_ticker)
     except Exception as e:
@@ -74,7 +81,7 @@ def chart_process_cybos_ticker_list(cybos_ticker: str, start_date: int, end_date
     insert_chart(hist_df)
 
 
-def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end_date: int):
+def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end_date: int, cybos_indicator_list: list):
     """
     1) cybos_ticker, 시작date, 종료date 입력
     2) cybos api 호출 제한 - sleep 설정
@@ -92,7 +99,10 @@ def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end
         print(f"유효하지 않은 종목코드 에러 발생: {e}")
         return
 
-    indicator_df = fetch_cybos_indicator_data(cybos_ticker, start_date, end_date)
+    indicator_df = fetch_cybos_indicator_data(cybos_ticker, start_date, end_date, cybos_indicator_list)
+    if indicator_df is None:
+        print(f"[SKIP] 지표 없음: {cybos_ticker}")
+        return None
 
     print(indicator_df.head())
 
@@ -140,8 +150,8 @@ if __name__ == "__main__":
     #     upsert_market_cap(market_cap_df)
     #     #
     # #########################chart####################
-    start = 20250807
-    end = 20250807
+    start = 20250808
+    end = 20250808
     #
     # start,end = today_kst_int
 
@@ -169,6 +179,6 @@ if __name__ == "__main__":
     print(indicator_input_df)
 
     for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
-        indicator_process_indicator_input_df(t, start, end)
+        indicator_process_indicator_input_df(t, start, end, CYBOS_INDICATOR_LIST)
 
         #############################################
