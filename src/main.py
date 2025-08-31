@@ -2,7 +2,7 @@
 import faulthandler;
 
 from src.config.config import CYBOS_TICKER_LIST, CYBOS_INDICATOR_LIST
-from src.db.indicators_db import insert_indicator
+from src.db.indicators_db import insert_daily_indicator
 
 faulthandler.enable()
 
@@ -107,7 +107,7 @@ def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end
     print(indicator_df.head())
 
     long_indicator_df = process_indicator_df_to_long_df(indicator_df)
-    insert_indicator(long_indicator_df)
+    insert_daily_indicator(long_indicator_df)
 
 
 # TODO: 나중에 main()으로 변경
@@ -126,7 +126,7 @@ if __name__ == "__main__":
 
     if not did_market_open_today(today_kst_int, CYBOS_TICKER_LIST[0]):
         print("오늘은 휴장입니다.")
-        sys.exit(0)
+        # sys.exit(0)
 
     print("오늘자 장 마감 확인")
 
@@ -156,16 +156,16 @@ if __name__ == "__main__":
     # start,end = today_kst_int
 
 
-    for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
-        chart_process_cybos_ticker_list(t, start, end)
+    # for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
+    #     chart_process_cybos_ticker_list(t, start, end)
 
     # 여기서 조회 확인, 만약 업데이트된 차트 없으면 exit
     chart_df = fetch_chart_to_df_by_date(start, end)
-    if (chart_df is None) or (chart_df.empty):
-        print("추가된 차트 데이터가 없어서 프로그램을 종료합니다.")
-        sys.exit(0)
+    # if (chart_df is None) or (chart_df.empty):
+    #     print("추가된 차트 데이터가 없어서 프로그램을 종료합니다.")
+    #     sys.exit(0)
 
-    update_chart_change_percentage(start, end)
+    # update_chart_change_percentage(start, end)
 
     ########################daily_indicators####################
     # db에서 start, end 기간 가지는 df 불러온 다음, 지표 df 불러오기

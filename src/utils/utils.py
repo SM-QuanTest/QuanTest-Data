@@ -108,16 +108,16 @@ def process_indicator_df_to_long_df(input_df: pd.DataFrame) -> pd.DataFrame:
     long_df = input_df.melt(
         id_vars=id_cols,
         value_vars=value_cols,
-        var_name="indicators_name",
-        value_name="indicators_value"
+        var_name="indicator_line_name",
+        value_name="daily_indicator_value"
     )
 
-    long_df["indicators_value"] = pd.to_numeric(long_df["indicators_value"], errors="coerce")
-    long_df = long_df.dropna(subset=["indicators_value"])
+    long_df["daily_indicator_value"] = pd.to_numeric(long_df["daily_indicator_value"], errors="coerce")
+    long_df = long_df.dropna(subset=["daily_indicator_value"])
 
     long_df = (long_df
-    .sort_values(["chart_id", "indicators_name"])
+    .sort_values(["chart_id", "indicator_line_name"])
     .reset_index(drop=True)
-    [["chart_id", "indicators_value", "indicators_name"]]
+    [["chart_id", "daily_indicator_value", "indicator_line_name"]]
     )
     return long_df
