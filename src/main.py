@@ -3,6 +3,7 @@ import faulthandler;
 
 from src.config.config import CYBOS_TICKER_LIST, CYBOS_INDICATOR_LIST
 from src.db.indicators_db import insert_daily_indicator
+from src.db.latest_date_db import update_latest_date
 
 faulthandler.enable()
 
@@ -150,22 +151,23 @@ if __name__ == "__main__":
     #     upsert_market_cap(market_cap_df)
     #     #
     # #########################chart####################
-    start = 20250808
+    start = 20250804
     end = 20250808
     #
     # start,end = today_kst_int
 
 
-    # for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
-    #     chart_process_cybos_ticker_list(t, start, end)
+    for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
+        chart_process_cybos_ticker_list(t, start, end)
 
     # 여기서 조회 확인, 만약 업데이트된 차트 없으면 exit
     chart_df = fetch_chart_to_df_by_date(start, end)
-    # if (chart_df is None) or (chart_df.empty):
-    #     print("추가된 차트 데이터가 없어서 프로그램을 종료합니다.")
-    #     sys.exit(0)
+    if (chart_df is None) or (chart_df.empty):
+        print("추가된 차트 데이터가 없어서 프로그램을 종료합니다.")
+        sys.exit(0)
 
-    # update_chart_change_percentage(start, end)
+    update_chart_change_percentage(start, end)
+    update_latest_date('charts', end)
 
     ########################daily_indicators####################
     # db에서 start, end 기간 가지는 df 불러온 다음, 지표 df 불러오기
@@ -181,4 +183,4 @@ if __name__ == "__main__":
     for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
         indicator_process_indicator_input_df(t, start, end, CYBOS_INDICATOR_LIST)
 
-        #############################################
+    update_latest_date('daily_indicators', end)
