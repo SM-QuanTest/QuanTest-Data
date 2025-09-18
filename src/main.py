@@ -4,6 +4,7 @@ import faulthandler;
 from src.config.config import CYBOS_TICKER_LIST, CYBOS_INDICATOR_LIST
 from src.db.indicators_db import insert_daily_indicator
 from src.db.latest_date_db import update_latest_date
+from src.db.pattern_db import fetch_candle_chart_pattern
 
 faulthandler.enable()
 
@@ -80,6 +81,26 @@ def chart_process_cybos_ticker_list(cybos_ticker: str, start_date: int, end_date
 
     print(hist_df.head())
     insert_chart(hist_df)
+
+# def pattern_input_df(cybos_ticker: str, start_date: int, end_date: int, cybos_indicator_list: list):
+#     """
+#     1)
+#     """
+#
+#     # 각 종목별로, pattern 함수를 쫙 돌리고, 나온 것들을 pattern_df에다가 추가하는 방식으로 가야함.
+#     # 그 후 for문 나와서 결과를 db에다가 한 번에 넣어주면 됨.
+#     # 그러러면 어떻게 해야하는 거지/.?
+#     pattern_df =
+#
+#     # indicator_df = fetch_cybos_indicator_data(cybos_ticker, start_date, end_date, cybos_indicator_list)
+#     # if indicator_df is None:
+#     #     print(f"[SKIP] 지표 없음: {cybos_ticker}")
+#     #     return None
+#     #
+#     # print(indicator_df.head())
+
+
+
 
 
 def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end_date: int, cybos_indicator_list: list):
@@ -169,16 +190,14 @@ if __name__ == "__main__":
     update_chart_change_percentage(start, end)
     update_latest_date('charts', end)
 
+    ########################patterns####################
+    pattern_df = fetch_candle_chart_pattern(start, end)
+    # insert_patterns(pattern_df)
+
+
     ########################daily_indicators####################
     # db에서 start, end 기간 가지는 df 불러온 다음, 지표 df 불러오기
 
-    indicator_input_df = (
-        chart_df[['id', 'chart_date', 'stock_id']]
-        .sort_values(['stock_id', 'chart_date'])
-        .reset_index(drop=True)
-    )
-
-    print(indicator_input_df)
 
     for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
         indicator_process_indicator_input_df(t, start, end, CYBOS_INDICATOR_LIST)

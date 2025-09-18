@@ -5,6 +5,8 @@ from src.db.chart_db import select_previous_chart, fetch_chart_to_df_by_ticker_a
 
 from typing import Dict, List
 
+from src.utils.utils import process_tickers
+
 
 def get_all_index_names() -> list:
     """
@@ -175,7 +177,7 @@ def fetch_cybos_indicator_data(cybos_ticker: str, start_date: int, end_date: int
         print(f"[SKIP] 유효하지 않은(또는 상폐) 코드: {repr(cybos_ticker)}")
         return None
 
-    df = fetch_chart_to_df_by_ticker_and_date(cybos_ticker, start_date, end_date)
+    df = fetch_chart_to_df_by_ticker_and_date(process_tickers(cybos_ticker), start_date, end_date)
     print(df.head())
     chart_df = None
     # all_index_names = get_all_index_names()

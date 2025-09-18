@@ -4,8 +4,34 @@ import pandas as pd
 
 from src.config.config import CYBOS_TICKER_LIST
 from src.db.chart_db import fetch_chart_to_df_by_ticker_and_date, select_previous_chart
+from src.db.pattern import *
 from src.utils.utils import process_tickers
 
+def detect_pattern(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    1) df에는 같은 stock_id를 가진 df가 들어옴.
+    2) pattern.py 안의 모든 함수를 돌린 후, 해당하는 패턴이 있으면 -> 해당 chart_id와 pattern_id를 찾아 df에 추가
+    3) 전부 돌린 후 df 리턴
+    """
+
+    pattern_functions = [
+        (is_hammer, 1), (is_hanging_man, 2), (is_bullish_engulfing, 3), (is_bearish_engulfing, 4),
+        (is_morning_star, 7), (is_evening_star, 8), (is_morning_doji_star, 9), (is_evening_doji_star, 10), (is_shooting_star, 11), (is_inverted_hammer, 12),
+        (is_harami_after_uptrend, 13), (is_harami_after_downtrend, 14), (is_harami_cross_after_uptrend, 15), (is_harami_cross_after_downtrend, 16), (is_tweezers_bottom, 17), (is_tweezers_top, 18),
+        (is_belt_hold_line_after_downtrend, 19), (is_belt_hold_line_after_uptrend, 20), (is_upside_gap_two_crows, 21), (is_three_black_crow, 22), (is_three_advancing_white_soldier, 23),
+        (is_counterattack_lines_after_downtrend, 26), (is_counterattack_lines_after_uptrend, 27),
+        (is_rising_window_df, 32), (is_falling_window_df, 33), (is_rising_gap_tasuki, 34), (is_falling_gap_tasuki, 35), (is_high_gapping_play, 36), (is_low_gapping_play, 37),
+        (is_rising_side_by_side, 38), (is_falling_side_by_side, 39), (is_rising_three_methods, 40), (is_falling_three_methods, 41),
+        (is_rising_separating_lines, 42), (is_falling_separating_lines, 43),
+        (is_northern_doji, 44), (is_falling_long_legged_doji, 45), (is_falling_gravestone_doji, 46), (is_rising_dragonfly_doji, 47), (is_falling_three_stars, 48), (is_rising_three_stars, 49)
+    ]
+
+    detected_pattern = pd.DataFrame(columns=["chart_id", "pattern_id"])
+
+    for function, pattern_id in pattern_functions:
+        detected_pattern = pd.concat([detected_pattern, function(df, pattern_id)], ignore_index=True)
+
+    return detected_pattern
 
 def fetch_candle_chart_pattern(start_date: date, end_date: date) -> pd.DataFrame:
     """
@@ -49,15 +75,10 @@ def fetch_candle_chart_pattern(start_date: date, end_date: date) -> pd.DataFrame
 
         df = df.sort_values("날짜").reset_index(drop=True)
 
+        dectected_df = detect_pattern(df)
+        pattern_df = pd.concat([pattern_df, dectected_df], ignore_index=True)
 
-
-        # dectected_df = detect_pattern(df)
-        # pattern_df = pd.concat([pattern_df, dectected_df], ignore_index=True)
-        #
-        # print(pattern_df.head())
-        # print(pattern_df.tail())
-
-        pattern_df = None
+        print(pattern_df.tail())
 
     return pattern_df
 

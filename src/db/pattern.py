@@ -1,6 +1,5 @@
-from datetime import date
-
 import pandas as pd
+
 
 # 상승추세
 def is_uptrend(df):
@@ -26,7 +25,7 @@ def is_downtrend(df):
 
 #
 
-def is_hammer(df):  # 망치형
+def is_hammer(df, pattern_id: int=1):  # 망치형
     downtrend = is_downtrend(df)
     body = (df['시가'] - df['종가']).abs()
     total_length = df['고가'] - df['저가']
@@ -36,10 +35,13 @@ def is_hammer(df):  # 망치형
             (body <= total_length / 3) &
             (lower_tail >= 2 * body)
     )
-    return hammer_condition.astype(int)
+
+    hits = df.loc[hammer_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_hanging_man(df):  # 교수형
+def is_hanging_man(df, pattern_id: int=2):  # 교수형
     uptrend = is_uptrend(df)
     body = (df['시가'] - df['종가']).abs()
     total_length = df['고가'] - df['저가']
@@ -49,10 +51,13 @@ def is_hanging_man(df):  # 교수형
             (body <= total_length / 3) &
             (lower_tail >= 2 * body)
     )
-    return hanging_man_condition.astype(int)
+
+    hits = df.loc[hanging_man_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_bullish_engulfing(df):  # 상승장악형
+def is_bullish_engulfing(df, pattern_id: int=3):  # 상승장악형
     downtrend = is_downtrend(df)
     prev_open = df['시가'].shift(1)
     prev_close = df['종가'].shift(1)
@@ -67,10 +72,13 @@ def is_bullish_engulfing(df):  # 상승장악형
             curr_bullish &
             engulfing_condition
     )
-    return bullish_engulfing_condition.astype(int)
+
+    hits = df.loc[bullish_engulfing_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_bearish_engulfing(df):  # 하락장악형
+def is_bearish_engulfing(df, pattern_id: int=4):  # 하락장악형
     uptrend = is_uptrend(df)
     prev_open = df['시가'].shift(1)
     prev_close = df['종가'].shift(1)
@@ -85,12 +93,15 @@ def is_bearish_engulfing(df):  # 하락장악형
             curr_bearish &
             engulfing_condition
     )
-    return bearish_engulfing_condition.astype(int)
+
+    hits = df.loc[bearish_engulfing_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 #############################################################################################################################
 # 샛별형 (하락추세 이후에 나타남)
-def is_morning_star(df):
+def is_morning_star(df, pattern_id: int=7):
     downtrend = is_downtrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -123,7 +134,9 @@ def is_morning_star(df):
     third_penetration = (c - c2) / (o2 - c2) >= 0.5
     cond3 = (third_bullish & third_penetration).fillna(False)
 
-    return (downtrend & cond1 & cond2 & cond3).fillna(False)
+    hits = df.loc[downtrend & cond1 & cond2 & cond3, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 저녁별형 (상승추세 이후에 나타남)
@@ -137,7 +150,7 @@ def is_morning_star(df):
 '''
 
 
-def is_evening_star(df):
+def is_evening_star(df, pattern_id: int=8):
     uptrend = is_uptrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -171,7 +184,9 @@ def is_evening_star(df):
     third_penetration = (c2 - c) / (c2 - o2) >= 0.5
     cond3 = (third_bullish & third_penetration).fillna(False)
 
-    return (uptrend & cond1 & cond2 & cond3).fillna(False)
+    hits = df.loc[uptrend & cond1 & cond2 & cond3, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 십자샛별형 (하락추세 이후에 나타남)
@@ -181,7 +196,7 @@ def is_evening_star(df):
 '''
 
 
-def is_morning_doji_star(df):
+def is_morning_doji_star(df, pattern_id: int=9):
     downtrend = is_downtrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -215,7 +230,9 @@ def is_morning_doji_star(df):
     third_penetration = (c - c2) / (o2 - c2) >= 0.5
     cond3 = (third_bullish & third_penetration).fillna(False)
 
-    return (downtrend & cond1 & cond2 & cond3).fillna(False)
+    hits = df.loc[downtrend & cond1 & cond2 & cond3, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 십자저녁별형 (상승추세 이후에 나타남)
@@ -226,7 +243,7 @@ def is_morning_doji_star(df):
 '''
 
 
-def is_evening_doji_star(df):
+def is_evening_doji_star(df, pattern_id: int=10):
     uptrend = is_uptrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -260,7 +277,9 @@ def is_evening_doji_star(df):
     third_penetration = (c2 - c) / (c2 - o2) >= 0.5
     cond3 = (third_bullish & third_penetration).fillna(False)
 
-    return (uptrend & cond1 & cond2 & cond3).fillna(False)
+    hits = df.loc[uptrend & cond1 & cond2 & cond3, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 유성형(하락반전)
@@ -276,7 +295,7 @@ def is_evening_doji_star(df):
 '''
 
 
-def is_shooting_star(df):
+def is_shooting_star(df, pattern_id: int=11):
     uptrend = is_uptrend(df).shift(1).fillna(False)
 
     o = df['시가']
@@ -296,7 +315,9 @@ def is_shooting_star(df):
     lower_shadow = pd.concat([o, c], axis=1).min(axis=1) - l
     thin_lower = lower_shadow < 0.1 * body
 
-    return (uptrend & small_body & long_upper_tail & thin_lower).fillna(False)
+    hits = df.loc[uptrend & small_body & long_upper_tail & thin_lower, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 역망치형(상승반전)
@@ -310,7 +331,7 @@ def is_shooting_star(df):
 '''
 
 
-def is_inverted_hammer(df):
+def is_inverted_hammer(df, pattern_id: int=12):
     downtrend = is_downtrend(df).shift(1).fillna(False)
 
     o = df['시가']
@@ -330,14 +351,16 @@ def is_inverted_hammer(df):
     lower_shadow = pd.concat([o, c], axis=1).min(axis=1) - l
     thin_lower = lower_shadow < 0.1 * body
 
-    return (downtrend & small_body & long_upper_tail & thin_lower).fillna(False)
+    hits = df.loc[downtrend & small_body & long_upper_tail & thin_lower, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 ###############################################################################################################################
 
 
 # 상승추세 이후의 잉태형(상승잉태형)
-def is_harami_after_uptrend(df):
+def is_harami_after_uptrend(df, pattern_id: int=13):
     uptrend = is_uptrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -369,11 +392,13 @@ def is_harami_after_uptrend(df):
 
     small_in_big = (small_body_max <= big_body_max) & (small_body_min >= big_body_min)
 
-    return (uptrend & big_body & small_body & small_in_big).fillna(False)
+    hits = df.loc[uptrend & big_body & small_body & small_in_big, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 하락추세 이후의 잉태형(하락잉태형)
-def is_harami_after_downtrend(df):
+def is_harami_after_downtrend(df, pattern_id: int=14):
     downtrend = is_downtrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -405,7 +430,9 @@ def is_harami_after_downtrend(df):
 
     small_in_big = (small_body_max <= big_body_max) & (small_body_min >= big_body_min)
 
-    return (downtrend & big_body & small_body & small_in_big).fillna(False)
+    hits = df.loc[downtrend & big_body & small_body & small_in_big, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 십자잉태형
@@ -421,7 +448,7 @@ def is_harami_after_downtrend(df):
 
 
 # 상승추세 이후의 십자잉태형(상승십자잉태형)
-def is_harami_cross_after_uptrend(df):
+def is_harami_cross_after_uptrend(df, pattern_id: int=15):
     uptrend = is_uptrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -454,11 +481,13 @@ def is_harami_cross_after_uptrend(df):
 
     doji_in_big = (doji_body_max <= big_body_max) & (doji_body_min >= big_body_min)
 
-    return (uptrend & big_body & doji_body & doji_in_big).fillna(False)
+    hits = df.loc[uptrend & big_body & doji_body & doji_in_big, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 하락추세 이후의 십자잉태형(하락십자잉태형)
-def is_harami_cross_after_downtrend(df):
+def is_harami_cross_after_downtrend(df, pattern_id: int=16):
     downtrend = is_downtrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -491,7 +520,9 @@ def is_harami_cross_after_downtrend(df):
 
     doji_in_big = (doji_body_max <= big_body_max) & (doji_body_min >= big_body_min)
 
-    return (downtrend & big_body & doji_body & doji_in_big).fillna(False)
+    hits = df.loc[downtrend & big_body & doji_body & doji_in_big, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 집게형
@@ -510,7 +541,7 @@ def is_harami_cross_after_downtrend(df):
 
 
 # 상승집게형(하락장이후)
-def is_tweezers_bottom(df):
+def is_tweezers_bottom(df, pattern_id: int=17):
     downtrend = is_downtrend(df).fillna(False)
 
     l = df['저가']
@@ -523,11 +554,13 @@ def is_tweezers_bottom(df):
     # 두 번째 캔들이 첫 번째 캔들보다 50% 작아야함
     small_body = body <= body_1 * 0.5
 
-    return (downtrend & same_low & small_body).fillna(False)
+    hits = df.loc[downtrend & same_low & small_body, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 하락집게형(상승장이후)
-def is_tweezers_top(df):
+def is_tweezers_top(df, pattern_id: int=18):
     uptrend = is_uptrend(df).fillna(False)
 
     h = df['고가']
@@ -540,7 +573,9 @@ def is_tweezers_top(df):
     # 두 번째 캔들이 첫 번째 캔들보다 작아야함
     small_body = body <= body_1 * 0.5
 
-    return (uptrend & same_high & small_body).fillna(False)
+    hits = df.loc[uptrend & same_high & small_body, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 샅바형
@@ -552,7 +587,7 @@ def is_tweezers_top(df):
 
 
 # 상승샅바형(하락장이후)
-def is_belt_hold_line_after_downtrend(df):
+def is_belt_hold_line_after_downtrend(df, pattern_id: int=19):
     downtrend = is_downtrend(df).fillna(False)
 
     o = df['시가']
@@ -566,11 +601,13 @@ def is_belt_hold_line_after_downtrend(df):
 
     long_bullish = ((c - o) / o) >= 0.03
 
-    return (downtrend & same_open_low & same_close_high & long_bullish).fillna(False)
+    hits = df.loc[downtrend & same_open_low & same_close_high & long_bullish, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 하락샅바형(상승장이후)
-def is_belt_hold_line_after_uptrend(df):
+def is_belt_hold_line_after_uptrend(df, pattern_id: int=20):
     uptrend = is_uptrend(df).fillna(False)
 
     o = df['시가']
@@ -584,7 +621,9 @@ def is_belt_hold_line_after_uptrend(df):
 
     long_bearish = ((o - c) / o) >= 0.03
 
-    return (uptrend & same_open_high & same_close_low & long_bearish).fillna(False)
+    hits = df.loc[uptrend & same_open_high & same_close_low & long_bearish, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 까마귀형
@@ -596,7 +635,7 @@ def is_belt_hold_line_after_uptrend(df):
 
 
 # 까마귀형 (하락 반전신호)
-def is_upside_gap_two_crows(df):
+def is_upside_gap_two_crows(df, pattern_id: int=21):
     uptrend = is_uptrend(df).shift(2).fillna(False)
 
     o = df['시가']
@@ -618,7 +657,9 @@ def is_upside_gap_two_crows(df):
     gap = (h2 < o1) & (h2 < o)
     cond = (o > o1) & (c < c1)
 
-    return (uptrend & first_bullish & second_bearish & third_bearish & gap & cond).fillna(False)
+    hits = df.loc[uptrend & first_bullish & second_bearish & third_bearish & gap & cond, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 흑삼병
@@ -631,7 +672,7 @@ def is_upside_gap_two_crows(df):
 
 
 # 흑삼병(하락 반전)
-def is_three_black_crow(df):
+def is_three_black_crow(df, pattern_id: int=22):
     o = df['시가']
     h = df['고가']
     l = df['저가']
@@ -645,8 +686,9 @@ def is_three_black_crow(df):
     sim_close_low = ((l - c).abs() <= c * 0.1) & ((l1 - c1).abs() <= c * 0.1) & ((l2 - c2).abs() <= c * 0.1)
     open_in_last_bar = ((o > c1) & (o < o1)) & ((o1 > c2) & (o1 < o2))
 
-    return (all_bearish & sim_close_low & open_in_last_bar).fillna(False)
-
+    hits = df.loc[all_bearish & sim_close_low & open_in_last_bar, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 # 상승적삼병
 
@@ -659,7 +701,7 @@ def is_three_black_crow(df):
 
 
 # 상승적삼병
-def is_three_advancing_white_soldier(df):
+def is_three_advancing_white_soldier(df, pattern_id: int=23):
     o = df['시가']
     h = df['고가']
     c = df['종가']
@@ -674,7 +716,9 @@ def is_three_advancing_white_soldier(df):
     sim_close_high = ((h - c).abs() <= c * 0.1) & ((h1 - c1).abs() <= c1 * 0.1) & ((h2 - c2).abs() <= c2 * 0.1)
     open_in_last_bar = ((o < c1 * 1.02) & (o > o1 * 0.98)) & ((o1 < c2 * 1.02) & (o1 > o2 * 0.98))
 
-    return (all_bullish & all_long & sim_close_high & open_in_last_bar).fillna(False)
+    hits = df.loc[all_bullish & all_long & sim_close_high & open_in_last_bar, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 ##
@@ -682,7 +726,7 @@ def is_three_advancing_white_soldier(df):
 ##
 
 # 상승반격형 (상승반전신호)
-def is_counterattack_lines_after_downtrend(df):
+def is_counterattack_lines_after_downtrend(df, pattern_id: int=26):
     downtrend = is_downtrend(df).shift(1).fillna(False)
 
     o = df['시가']
@@ -704,11 +748,13 @@ def is_counterattack_lines_after_downtrend(df):
 
     touch = (c - c1).abs() <= body_1 * 0.1
 
-    return (downtrend & long_bearish & second_bullish & gap_down & touch).fillna(False)
+    hits = df.loc[downtrend & long_bearish & second_bullish & gap_down & touch, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # 하락반격형 (상승반전신호)
-def is_counterattack_lines_after_uptrend(df):
+def is_counterattack_lines_after_uptrend(df, pattern_id: int=27):
     uptrend = is_uptrend(df).shift(1).fillna(False)
 
     o = df['시가']
@@ -729,7 +775,9 @@ def is_counterattack_lines_after_uptrend(df):
 
     touch = (c - c1).abs() <= body_1 * 0.1
 
-    return (uptrend & long_bullish & second_bullish & gap_up & touch).fillna(False)
+    hits = df.loc[uptrend & long_bullish & second_bullish & gap_up & touch, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 ##
@@ -744,65 +792,93 @@ def is_rising_window(df):  # 상승창형
     prev_high = df['고가'].shift(1)
     curr_low = df['저가']
     gap_up = curr_low > prev_high
-    rising_window_condition = gap_up
-    return rising_window_condition.astype(int)
+    # rising_window_condition = gap_up
+    return gap_up
+
+
+def is_rising_window_df(df, pattern_id: int=32):
+
+    cond = is_rising_window(df).astype('boolean').fillna(False)
+
+    hits = df.loc[cond, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 def is_falling_window(df):  # 하락창형
     prev_low = df['저가'].shift(1)
     curr_high = df['고가']
     gap_down = curr_high < prev_low
-    falling_window_condition = gap_down
-    return falling_window_condition.astype(int)
+    # falling_window_condition = gap_down
+    return gap_down
 
 
-def is_rising_gap_tasuki(df):  # 상승갭 타스키형
-    rising_window = is_rising_window(df)
+def is_falling_window_df(df, pattern_id: int=33):
+    cond = is_falling_window(df).astype('boolean').fillna(False)
+
+    hits = df.loc[cond, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
+
+
+def is_rising_gap_tasuki(df, pattern_id: int=34):  # 상승갭 타스키형
+    rising_prev = is_rising_window(df).astype('boolean').shift(1).fillna(False)
     prev_open = df['시가'].shift(1)
     prev_close = df['종가'].shift(1)
     curr_open = df['시가']
     curr_close = df['종가']
     gap_prev_high = df['고가'].shift(2)
-    prev_bullish = prev_close > prev_open
-    curr_bearish = curr_close < curr_open
+
+    prev_bullish = (prev_close > prev_open).fillna(False)
+    curr_bearish = (curr_close < curr_open).fillna(False)
+
     prev_body = (prev_close - prev_open).abs()
     curr_body = (curr_close - curr_open).abs()
-    similar_body = (curr_body >= 0.9 * prev_body) & (curr_body <= 1.1 * prev_body)
-    gap_maintained = curr_close > gap_prev_high
+    similar_body = ((curr_body >= 0.9 * prev_body) & (curr_body <= 1.1 * prev_body)).astype('boolean').fillna(False)
+    gap_maintained = (curr_close > gap_prev_high).astype('boolean').fillna(False)
     rising_gap_tasuki_condition = (
-            rising_window.shift(1) &
+            rising_prev &
             prev_bullish &
             curr_bearish &
             similar_body &
             gap_maintained
     )
-    return rising_gap_tasuki_condition.astype(int)
+
+    hits = df.loc[rising_gap_tasuki_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_falling_gap_tasuki(df):  # 히릭갭타스키형
-    falling_window = is_falling_window(df)
+def is_falling_gap_tasuki(df, pattern_id: int=35):  # 히릭갭타스키형
+    falling_prev = is_falling_window(df).astype('boolean').shift(1).fillna(False)
+
     prev_open = df['시가'].shift(1)
     prev_close = df['종가'].shift(1)
     curr_open = df['시가']
     curr_close = df['종가']
     gap_prev_low = df['저가'].shift(2)
-    prev_bearish = prev_close < prev_open
-    curr_bullish = curr_close > curr_open
+
+    prev_bearish = (prev_close < prev_open).fillna(False)
+    curr_bullish = (curr_close > curr_open).fillna(False)
+
     prev_body = (prev_open - prev_close).abs()
     curr_body = (curr_close - curr_open).abs()
-    similar_body = (curr_body >= 0.9 * prev_body) & (curr_body <= 1.1 * prev_body)
-    gap_maintained = curr_close < gap_prev_low
+    similar_body = ((curr_body >= 0.9 * prev_body) & (curr_body <= 1.1 * prev_body)).astype('boolean').fillna(False)
+    gap_maintained = (curr_close < gap_prev_low).astype('boolean').fillna(False)
     falling_gap_tasuki_condition = (
-            falling_window.shift(1) &
+            falling_prev &
             prev_bearish &
             curr_bullish &
             similar_body &
             gap_maintained
     )
-    return falling_gap_tasuki_condition.astype(int)
+
+    hits = df.loc[falling_gap_tasuki_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_high_gapping_play(df):  # 고가 갭핑플레이형
+def is_high_gapping_play(df, pattern_id: int=36):  # 고가 갭핑플레이형
     rising_window = is_rising_window(df)
     high_gapping_conditions = []
     for lookback in range(4, 8):
@@ -838,10 +914,13 @@ def is_high_gapping_play(df):  # 고가 갭핑플레이형
         )
         high_gapping_conditions.append(condition)
     final_condition = pd.concat(high_gapping_conditions, axis=1).any(axis=1)
-    return final_condition.astype(int)
+
+    hits = df.loc[final_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_low_gapping_play(df):  # 저가 갭핑플레이형
+def is_low_gapping_play(df, pattern_id: int=37):  # 저가 갭핑플레이형
     falling_window = is_falling_window(df)
     low_gapping_conditions = []
     for lookback in range(4, 8):
@@ -876,10 +955,12 @@ def is_low_gapping_play(df):  # 저가 갭핑플레이형
         )
         low_gapping_conditions.append(condition)
     final_condition = pd.concat(low_gapping_conditions, axis=1).any(axis=1)
-    return final_condition.astype(int)
 
+    hits = df.loc[final_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
-def is_rising_side_by_side(df):  # 상승나란히형
+def is_rising_side_by_side(df, pattern_id: int=38):  # 상승나란히형
     rising_window_2days_ago = is_rising_window(df).shift(2)
     first_open = df['시가'].shift(1)
     first_close = df['종가'].shift(1)
@@ -898,10 +979,13 @@ def is_rising_side_by_side(df):  # 상승나란히형
             similar_open &
             appropriate_body_size
     )
-    return rising_side_by_side_condition.astype(int)
+
+    hits = df.loc[rising_side_by_side_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_falling_side_by_side(df):  # 하락나란히형
+def is_falling_side_by_side(df, pattern_id: int=39):  # 하락나란히형
     falling_window_2days_ago = is_falling_window(df).shift(2)
     first_open = df['시가'].shift(1)
     first_close = df['종가'].shift(1)
@@ -920,10 +1004,13 @@ def is_falling_side_by_side(df):  # 하락나란히형
             similar_open &
             appropriate_body_size
     )
-    return falling_side_by_side_condition.astype(int)
+
+    hits = df.loc[falling_side_by_side_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_rising_three_methods(df):  # 상승삼법형
+def is_rising_three_methods(df, pattern_id: int=40):  # 상승삼법형
     rising_three_conditions = []
     for small_candles in range(2, 5):
         first_long_idx = small_candles + 1
@@ -956,10 +1043,13 @@ def is_rising_three_methods(df):  # 상승삼법형
         )
         rising_three_conditions.append(condition)
     final_condition = pd.concat(rising_three_conditions, axis=1).any(axis=1)
-    return final_condition.astype(int)
+
+    hits = df.loc[final_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_falling_three_methods(df):  # 하락삼법형
+def is_falling_three_methods(df, pattern_id: int=41):  # 하락삼법형
     falling_three_conditions = []
     for small_candles in range(2, 5):
         first_long_idx = small_candles + 1
@@ -992,10 +1082,13 @@ def is_falling_three_methods(df):  # 하락삼법형
         )
         falling_three_conditions.append(condition)
     final_condition = pd.concat(falling_three_conditions, axis=1).any(axis=1)
-    return final_condition.astype(int)
+
+    hits = df.loc[final_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_rising_separating_lines(df):  # 상승갈림길형
+def is_rising_separating_lines(df, pattern_id: int=42):  # 상승갈림길형
     uptrend = is_uptrend(df)
     prev_open = df['시가'].shift(1)
     prev_close = df['종가'].shift(1)
@@ -1010,10 +1103,13 @@ def is_rising_separating_lines(df):  # 상승갈림길형
             curr_bullish &
             similar_open
     )
-    return rising_separating_condition.astype(int)
+
+    hits = df.loc[rising_separating_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_falling_separating_lines(df):  # 하락갈림길형
+def is_falling_separating_lines(df, pattern_id: int=43):  # 하락갈림길형
     downtrend = is_downtrend(df)
     prev_open = df['시가'].shift(1)
     prev_close = df['종가'].shift(1)
@@ -1028,17 +1124,20 @@ def is_falling_separating_lines(df):  # 하락갈림길형
             curr_bearish &
             similar_open
     )
-    return falling_separating_condition.astype(int)
+
+    hits = df.loc[falling_separating_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 def is_doji(df):
     body = (df['시가'] - df['종가']).abs()
     total_length = df['고가'] - df['저가']
     doji_condition = body < (total_length * 0.05)
-    return doji_condition.astype(int)
+    return doji_condition
 
 
-def is_northern_doji(df):  # 북향도지형
+def is_northern_doji(df, pattern_id: int=44):  # 북향도지형
     uptrend = is_uptrend(df)
     doji = is_doji(df)
     doji_count_20days = is_doji(df).rolling(window=20, min_periods=1).sum()
@@ -1048,7 +1147,10 @@ def is_northern_doji(df):  # 북향도지형
             doji &
             valid_pattern
     )
-    return northern_doji_condition.astype(int)
+
+    hits = df.loc[northern_doji_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # def is_rising_long_legged_doji(df):#상승키다리도지형
@@ -1071,7 +1173,7 @@ def is_northern_doji(df):  # 북향도지형
 #     )
 #     return rising_long_legged_doji_condition.astype(int)
 
-def is_falling_long_legged_doji(df):  # 하락키다리도지형
+def is_falling_long_legged_doji(df, pattern_id: int=45):  # 하락키다리도지형
     downtrend = is_downtrend(df)
     doji = is_doji(df)
     doji_count_20days = is_doji(df).rolling(window=20, min_periods=1).sum()
@@ -1089,7 +1191,10 @@ def is_falling_long_legged_doji(df):  # 하락키다리도지형
             valid_pattern &
             in_middle_third
     )
-    return falling_long_legged_doji_condition.astype(int)
+
+    hits = df.loc[falling_long_legged_doji_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # def is_rising_gravestone_doji(df):#상승비석도지형
@@ -1110,7 +1215,7 @@ def is_falling_long_legged_doji(df):  # 하락키다리도지형
 #     )
 #     return rising_gravestone_doji_condition.astype(int)
 
-def is_falling_gravestone_doji(df):  # 하락비석도지형
+def is_falling_gravestone_doji(df, pattern_id: int=46):  # 하락비석도지형
     downtrend = is_downtrend(df)
     doji = is_doji(df)
     doji_count_20days = is_doji(df).rolling(window=20, min_periods=1).sum()
@@ -1126,10 +1231,13 @@ def is_falling_gravestone_doji(df):  # 하락비석도지형
             valid_pattern &
             in_bottom_quarter
     )
-    return falling_gravestone_doji_condition.astype(int)
+
+    hits = df.loc[falling_gravestone_doji_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
-def is_rising_dragonfly_doji(df):  # 상승잠자리도지형
+def is_rising_dragonfly_doji(df, pattern_id: int=47):  # 상승잠자리도지형
     uptrend = is_uptrend(df)
     doji = is_doji(df)
     doji_count_20days = is_doji(df).rolling(window=20, min_periods=1).sum()
@@ -1145,7 +1253,10 @@ def is_rising_dragonfly_doji(df):  # 상승잠자리도지형
             valid_pattern &
             in_top_quarter
     )
-    return rising_dragonfly_doji_condition.astype(int)
+
+    hits = df.loc[rising_dragonfly_doji_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
 # def is_falling_dragonfly_doji(df):#하락잠자리도지형
@@ -1166,30 +1277,8 @@ def is_rising_dragonfly_doji(df):  # 상승잠자리도지형
 #     )
 #     return falling_dragonfly_doji_condition.astype(int)
 
-# def is_rising_three_stars(df):#상승삼별형
-#     doji_today = is_doji(df)
-#     doji_1day_ago = is_doji(df).shift(1)
-#     doji_2day_ago = is_doji(df).shift(2)
-#     three_consecutive_doji = doji_today & doji_1day_ago & doji_2day_ago
-#     doji_count_20days = is_doji(df).rolling(window=20, min_periods=1).sum()
-#     valid_pattern = doji_count_20days < 6
-#     high_20days = df['고가'].rolling(window=20, min_periods=1).max()
-#     high_today = df['고가']
-#     high_1day_ago = df['고가'].shift(1)
-#     high_2day_ago = df['고가'].shift(2)
-#     high_breakout = (
-#         (high_today > high_20days) |
-#         (high_1day_ago > high_20days.shift(1)) |
-#         (high_2day_ago > high_20days.shift(2))
-#     )
-#     rising_three_stars_condition = (
-#         three_consecutive_doji &
-#         valid_pattern &
-#         high_breakout
-#     )
-#     return rising_three_stars_condition.astype(int)
 
-def is_falling_three_stars(df):  # 하락삼별형
+def is_falling_three_stars(df, pattern_id: int=18):  # 하락삼별형
     doji_today = is_doji(df)
     doji_1day_ago = is_doji(df).shift(1)
     doji_2day_ago = is_doji(df).shift(2)
@@ -1210,7 +1299,34 @@ def is_falling_three_stars(df):  # 하락삼별형
             valid_pattern &
             low_breakdown
     )
-    return falling_three_stars_condition.astype(int)
+
+    hits = df.loc[falling_three_stars_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)
 
 
+def is_rising_three_stars(df, pattern_id: int=49):#상승삼별형
+    doji_today = is_doji(df)
+    doji_1day_ago = is_doji(df).shift(1)
+    doji_2day_ago = is_doji(df).shift(2)
+    three_consecutive_doji = doji_today & doji_1day_ago & doji_2day_ago
+    doji_count_20days = is_doji(df).rolling(window=20, min_periods=1).sum()
+    valid_pattern = doji_count_20days < 6
+    high_20days = df['고가'].rolling(window=20, min_periods=1).max()
+    high_today = df['고가']
+    high_1day_ago = df['고가'].shift(1)
+    high_2day_ago = df['고가'].shift(2)
+    high_breakout = (
+        (high_today > high_20days) |
+        (high_1day_ago > high_20days.shift(1)) |
+        (high_2day_ago > high_20days.shift(2))
+    )
+    rising_three_stars_condition = (
+        three_consecutive_doji &
+        valid_pattern &
+        high_breakout
+    )
 
+    hits = df.loc[rising_three_stars_condition, ["chart_id"]].copy()
+    hits["pattern_id"] = pattern_id
+    return hits.reset_index(drop=True)

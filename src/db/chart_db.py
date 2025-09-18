@@ -101,14 +101,13 @@ def fetch_chart_to_df_by_date(start: int, end: int):
     return df
 
 
-def fetch_chart_to_df_by_ticker_and_date(cybos_ticker: str, start: int, end: int):
+def fetch_chart_to_df_by_ticker_and_date(ticker: str, start: int, end: int):
     """
     1) cybos_ticker, start, end date 입력받고 해당하는 chart 차트가 있는지 조회
     2) 날짜,시고저종거래량,id,stock_id df 리턴
     """
     start_date = datetime.strptime(str(start), "%Y%m%d").date()
     end_date = datetime.strptime(str(end), "%Y%m%d").date()
-    ticker = process_tickers(cybos_ticker)
 
     sql = text("""
                SELECT c.id AS chart_id,
@@ -193,5 +192,5 @@ def select_previous_chart(stock_id: int, chart_date: date) -> pd.DataFrame:
 
     with engine.begin() as conn:
         df = pd.read_sql(sql, conn, params={'stock_id': stock_id, 'chart_date': chart_date})
-        print(f">>> 지표 계산 위한 chart 조회 완료: {len(df)}건")
+        print(f">>> 이전 chart 조회 완료: {len(df)}건")
         return df
