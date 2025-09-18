@@ -52,7 +52,7 @@ def fetch_candle_chart_pattern(start_date: date, end_date: date) -> pd.DataFrame
     5) for문을 돌아가며 계속 추가된 pattern_df를 리턴
 
     """
-    pattern_df = None
+    results = []
 
     for cybos_ticker in CYBOS_TICKER_LIST:
         chart_by_stock_df = fetch_chart_to_df_by_ticker_and_date(process_tickers(cybos_ticker), start_date, end_date)
@@ -86,9 +86,13 @@ def fetch_candle_chart_pattern(start_date: date, end_date: date) -> pd.DataFrame
         df = df.sort_values("날짜").reset_index(drop=True)
 
         dectected_df = detect_pattern(df)
-        pattern_df = pd.concat([pattern_df, dectected_df], ignore_index=True)
+        if not dectected_df.empty:
+            results.append(dectected_df)
 
-        print(pattern_df.tail())
+    if results:
+        pattern_df = pd.concat(results, ignore_index=True)
+    else:
+        pattern_df = pd.DataFrame(columns=["chart_id", "pattern_id"])
 
     return pattern_df
 
