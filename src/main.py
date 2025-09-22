@@ -1,4 +1,3 @@
-# from pathlib import Path
 import faulthandler;
 
 from src.config.config import CYBOS_TICKER_LIST, CYBOS_INDICATOR_LIST
@@ -8,7 +7,6 @@ from src.db.pattern_db import fetch_candle_chart_pattern, insert_patterns
 
 faulthandler.enable()
 
-import sys
 import time
 
 import win32com.client
@@ -19,14 +17,12 @@ from zoneinfo import ZoneInfo
 
 from src.cybos.chart_cybos import fetch_cybos_chart_data, did_market_open_today
 from src.cybos.indicators_cybos import fetch_cybos_indicator_data
-from src.cybos.stock_cybos import save_stock
 from src.db.chart_db import insert_chart, update_chart_change_percentage, fetch_chart_to_df_by_date
-from src.db.stock_dl import insert_stocks
 from src.utils.utils import cybos_ticker_list_to_df, process_chart_list_to_df, process_indicator_df_to_long_df
 from .cybos.sector_cybos import *
-from .db.sector_dl import *
 
 import os, sys, builtins, functools
+
 os.environ.setdefault("PYTHONUNBUFFERED", "1")
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 try:
@@ -35,7 +31,6 @@ try:
 except Exception:
     pass
 builtins.print = functools.partial(builtins.print, flush=True)
-
 
 
 def InitPlusCheck():
@@ -64,7 +59,6 @@ def chart_process_cybos_ticker_list(cybos_ticker: str, start_date: int, end_date
     5) db에 chart 데이터 삽입
     """
 
-    # time.sleep(1.0)  # 15초 60건 제한
     time.sleep(0.2)
 
     try:
@@ -93,7 +87,6 @@ def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end
     """
 
     time.sleep(0.2)
-    # time.sleep(1.0)  # 15초 60건 제한
 
     try:
         get_obj_cp_code_mgr().CodeToName(cybos_ticker)
@@ -112,13 +105,8 @@ def indicator_process_indicator_input_df(cybos_ticker: str, start_date: int, end
     insert_daily_indicator(long_indicator_df)
 
 
-# TODO: 나중에 main()으로 변경
 if __name__ == "__main__":
     InitPlusCheck()
-
-    # cybos_ticker_df = get_code_cybos_ticker()
-    # cybos_ticker_df = load_cybos_tickers_db()
-
     cybos_ticker_df = cybos_ticker_list_to_df(CYBOS_TICKER_LIST)
 
     # ######################################################
@@ -145,18 +133,9 @@ if __name__ == "__main__":
     # # stock db download
     # insert_stocks(stock_df)
 
-    # #########################market_cap####################
-    #     market_cap_df = get_market_caps(kosdaq_cybos_ticker, 200)
-    #
-    #     # market_cap db download
-    #     upsert_market_cap(market_cap_df)
-    #     #
     # #########################chart####################
-    start = 20250804
-    end = 20250808
-    #
-    # start,end = today_kst_int
-
+    start = today_kst_int
+    end = today_kst_int
 
     for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
         chart_process_cybos_ticker_list(t, start, end)
@@ -174,11 +153,7 @@ if __name__ == "__main__":
     pattern_df = fetch_candle_chart_pattern(start, end)
     insert_patterns(pattern_df)
 
-
     ########################daily_indicators####################
-    # db에서 start, end 기간 가지는 df 불러온 다음, 지표 df 불러오기
-
-
     for t in tqdm(CYBOS_TICKER_LIST, total=len(CYBOS_TICKER_LIST), desc="Processing"):
         indicator_process_indicator_input_df(t, start, end, CYBOS_INDICATOR_LIST)
 
